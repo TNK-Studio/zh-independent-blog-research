@@ -25,6 +25,7 @@ pipenv install
 
     ```
     cd site && yarn 
-    yarn start 
-    yarn build 
+    yarn start # 开发
+    yarn build # 构建
+    yarn serve # 本地查看部署的站点（build 后）
     ```
