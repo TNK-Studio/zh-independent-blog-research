@@ -23,8 +23,8 @@ pipenv install
 
 + 构建前端
 
-```
-cd site && yarn 
-yarn start 
-yarn build 
-```
+    ```
+    cd site && yarn 
+    yarn start 
+    yarn build 
+    ```
