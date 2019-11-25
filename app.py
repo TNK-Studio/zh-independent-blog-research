@@ -5,7 +5,6 @@ import asyncio
 from urllib.parse import urljoin
 from urllib.parse import urlparse
 from queue import Queue
-from pprint import pprint
 from get import get_data
 from itertools import chain
 
@@ -20,6 +19,8 @@ def app(count, batch_size):
         last_run_status = json.load(f)
         list(map(q.put, last_run_status['q']))
 
+    if not os.path.exists('data'):
+        os.mkdir('data')
     visited_sites = set([site[:-5] for site in os.listdir('data')])
 
     while not q.empty() and count > 0:
