@@ -1,12 +1,6 @@
 import React from "react";
 import Graph from "react-graph-vis";
-
 import data from "./data.json"
-// import "./styles.css";
-// need to import the vis network css in order to show tooltip
-// import "./network.css";
-
-
 
 
 export default function App() {
