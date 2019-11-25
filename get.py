@@ -17,15 +17,21 @@ asession.mount('https://', adapter)
 zh_re = re.compile('[\u4e00-\u9fa5]')
 
 
-def is_zh_blog(friends, generator, has_zh_text):
+# 标题中出现这些关键词时，基本上不会是个人博客
+BLACK_WORDS = set({
+    "SEO", "官方", "导航", "网址"
+})
+
+
+def is_zh_blog(friends, generator, has_zh_text, name):
     if not has_zh_text:
         return False
-    else:
-        if generator == 'unknown' and len(friends) > 30:
-            # fixme 需要能多的特征判断一个站点是不是个人博客
-            return False
-        else:
-            return True
+    if any([name.index(word) > -1 for word in BLACK_WORDS]):
+        return False
+    if generator == 'unknown' and len(friends) > 30:
+        # fixme 需要更多的特征判断一个站点是不是个人博客
+        return False
+    return True
 
 
 def has_zh_text(r):
@@ -42,7 +48,7 @@ def get_data(urls):
         generator = get_generator(r)
         name = get_name(r)
         _has_zh_text = has_zh_text(r)
-        if is_zh_blog(friends, generator, _has_zh_text):
+        if is_zh_blog(friends, generator, _has_zh_text, name):
             data.append(SiteInfoItem(url=url, friends=friends,
                                      name=name, generator=generator))
         else:
