@@ -2,12 +2,15 @@ import os
 import json
 from urllib.parse import urljoin, urlparse
 
-PASS_URL = ["youtube.com", "wikipedia.org", "facebook.com", "twitter.com", "zhihu.com",
-            "weibo.com", "github.com", "reactjs.org", "material-ui.com", "gatsbyjs.org",
-            "steamcommunity.com", "segmentfault.com", "netlify.com", "wordpress.com", "taobao.com",
-            "gohugo.io", "hexo.io", "gov.cn", "cloudflare.com", "ubuntu.com",
-            "docker.com", "jekyll.com", "localhost"
-            ]
+
+# 整个 alexa top 100 排名？
+PASS_DOMAIN = ["youtube.com", "wikipedia.org", "facebook.com", "twitter.com", "zhihu.com",
+               "weibo.com", "github.com", "reactjs.org", "material-ui.com", "gatsbyjs.org",
+               "steamcommunity.com", "segmentfault.com", "netlify.com", "wordpress.com", "taobao.com",
+               "gohugo.io", "hexo.io", "gov.cn", "cloudflare.com", "ubuntu.com",
+               "docker.com", "jekyll.com", "localhost", "blogspot.com", "tmall.com",
+               "wordpress.cn", "wordpress.org", "baidu.com"
+               ]
 
 
 def geuss_link_url(url):
@@ -33,13 +36,13 @@ def rm_slash(url):
     return url
 
 
-def to_json():
+def to_json_data():
     data = []
     for itemdir in iter(os.listdir('data')):
         with open('data/'+itemdir, 'r') as f:
             data.append(json.load(f))
 
-    with open('data.json', 'w') as f:
+    with open('site/src/data.json', 'w') as f:
         json.dump(data, f)
     # return data
 

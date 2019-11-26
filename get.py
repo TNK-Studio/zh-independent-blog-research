@@ -2,7 +2,7 @@ from urllib.parse import urljoin
 from urllib.parse import urlparse
 from requests_html import AsyncHTMLSession
 # from requests_html import HTMLSession
-from utils import PASS_URL, geuss_link_url, rm_slash
+from utils import PASS_DOMAIN, geuss_link_url, rm_slash
 from itertools import chain
 from schema import SiteInfoItem
 import requests
@@ -110,7 +110,8 @@ def get_frineds_and_res(urls):
                         break
                     elif r.status_code == 200 and urlparse(r.url).netloc == urlparse(url).netloc:
                         if not friends:
-                            pass_domain = PASS_URL + [urlparse(r.url).netloc]
+                            pass_domain = PASS_DOMAIN + \
+                                [urlparse(r.url).netloc]
                             friends = list(
                                 map(lambda url: rm_slash(url), r.html.absolute_links))
 

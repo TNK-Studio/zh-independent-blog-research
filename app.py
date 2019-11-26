@@ -1,6 +1,7 @@
 import json
 import os
 import asyncio
+import sys
 
 from urllib.parse import urljoin
 from urllib.parse import urlparse
@@ -55,4 +56,4 @@ def app(count, batch_size):
 
 
 if __name__ == "__main__":
-    app(800, 8)
+    app(8, 8)

@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import Graph from "react-graph-vis";
+import graph from "./graph.json"
 import data from "./data.json"
 
-
 export default function App() {
-  const graph = data
-
+  // const graph = data
+  const [network, setNetwork] = useState({})
   const options = {
     nodes: {
       shape: "dot",
@@ -46,15 +46,18 @@ export default function App() {
       console.log(nodes, edges)
     }
   };
-  return (
+  return (<>
+    <div>
+      search
+    </div>
     <Graph
       graph={graph}
       options={options}
       events={events}
       getNetwork={network => {
-        console.log(network)
+        setNetwork(network)
         //  if you want access to vis.js network api you can set the state in a parent component using this property
       }}
     />
-  );
+  </>);
 }
