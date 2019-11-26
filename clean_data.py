@@ -9,6 +9,9 @@ class Cleaner:
         self.all_sites = os.listdir(path)
 
     def clear_pass_domain_data(self):
+        """
+        清理已经爬取的 pass_domain 的站点数据
+        """
         for i in iter(self.all_sites):
             if any([i.endswith(f"{domain}.json") for domain in PASS_DOMAIN]):
                 os.remove(os.path.join(self.path, i))
@@ -33,6 +36,9 @@ class Cleaner:
             json.dump(data, f)
 
     def fix_q(self):
+        """
+        修复异常情况导致下队列丢失的问题
+        """
         res = []
         visited_site = set()
         for itemdir in iter(self.all_sites):
@@ -55,5 +61,5 @@ class Cleaner:
 if __name__ == "__main__":
     c = Cleaner('data')
     c.clear_pass_domain_data()
-    c.clean_run_status()
     c.fix_q()
+    c.clean_run_status()
