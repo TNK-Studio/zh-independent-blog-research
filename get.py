@@ -1,12 +1,15 @@
+import os
+import requests
+import re
+
 from urllib.parse import urljoin
 from urllib.parse import urlparse
 from requests_html import AsyncHTMLSession
 # from requests_html import HTMLSession
-from utils import PASS_DOMAIN, geuss_link_url, rm_slash
+from utils import PASS_DOMAIN, geuss_link_url, rm_slash, has_url_html_been_fetched
 from itertools import chain
 from schema import SiteInfoItem
-import requests
-import re
+
 
 asession = AsyncHTMLSession()
 adapter = requests.adapters.HTTPAdapter(pool_connections=100, pool_maxsize=100)
@@ -41,6 +44,12 @@ def has_zh_text(r):
         return False
 
 
+def save_html(domain, html):
+    path = os.path.join('html', f'{domain}.html')
+    with open(path, 'w') as f:
+        f.write(html)
+
+
 def get_data(urls):
     res = get_frineds_and_res(urls)
     data = []
@@ -49,8 +58,11 @@ def get_data(urls):
         name = get_name(r)
         _has_zh_text = has_zh_text(r)
         if is_zh_blog(friends, generator, _has_zh_text, name):
-            data.append(SiteInfoItem(url=url, friends=friends,
-                                     name=name, generator=generator))
+            site = SiteInfoItem(url=url, friends=friends,
+                                name=name, generator=generator)
+            save_html(site.domain, str(r.html.html))
+            data.append(site)
+
         else:
             print('{} maybe not personal zh blog'.format(url))
     return data
@@ -82,7 +94,7 @@ def get_name(r):
 def get_generator(r):
     find_in_meta = r.html.find("meta[name='generator']", first=True)
     if find_in_meta:
-        return find_in_meta.attrs['content']
+        return find_in_meta.attrs.get('content', 'unknown')
 
     find_in_html_text = r.html.search("Powered by{}<a{}>{}</a>")
     if find_in_html_text:
@@ -95,6 +107,7 @@ def get_frineds_and_res(urls):
     """
     找到给定 url 的友情链接列表,返回友链 & 友链页面 html
     """
+    urls = [url for url in urls if not has_url_html_been_fetched(url)]
     all_urls = list(chain(*[geuss_link_url(url) for url in urls]))
     res = []
     try:

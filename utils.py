@@ -10,8 +10,14 @@ PASS_DOMAIN = ["youtube.com", "wikipedia.org", "facebook.com", "twitter.com", "z
                "steamcommunity.com", "segmentfault.com", "netlify.com", "wordpress.com", "taobao.com",
                "gohugo.io", "hexo.io", "gov.cn", "cloudflare.com", "ubuntu.com",
                "docker.com", "jekyll.com", "localhost", "blogspot.com", "tmall.com",
-               "wordpress.cn", "wordpress.org", "baidu.com", "blogger.com", "qq.com"
+               "wordpress.cn", "wordpress.org", "baidu.com", "blogger.com", "qq.com",
+               "edu.cn", "edu", "gov"
                ]
+
+
+def has_url_html_been_fetched(url):
+    path = f"{urlparse(url).netloc}.html"
+    return os.path.exists(path)
 
 
 def geuss_link_url(url):

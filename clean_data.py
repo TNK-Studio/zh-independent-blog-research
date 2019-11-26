@@ -16,6 +16,7 @@ class Cleaner:
             if any([i.endswith(f"{domain}.json") for domain in PASS_DOMAIN]):
                 os.remove(os.path.join(self.path, i))
                 print(f"{i} has been cleaned")
+            
 
     def clean_run_status(self):
         """
