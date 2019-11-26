@@ -26,7 +26,7 @@ BLACK_WORDS = set({
 def is_zh_blog(friends, generator, has_zh_text, name):
     if not has_zh_text:
         return False
-    if any([name.index(word) > -1 for word in BLACK_WORDS]):
+    if any([name.find(word) > -1 for word in BLACK_WORDS]):
         return False
     if generator == 'unknown' and len(friends) > 30:
         # fixme 需要更多的特征判断一个站点是不是个人博客
