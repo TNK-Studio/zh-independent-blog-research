@@ -1,5 +1,6 @@
 import os
 import json
+
 from urllib.parse import urljoin, urlparse
 
 
@@ -9,7 +10,7 @@ PASS_DOMAIN = ["youtube.com", "wikipedia.org", "facebook.com", "twitter.com", "z
                "steamcommunity.com", "segmentfault.com", "netlify.com", "wordpress.com", "taobao.com",
                "gohugo.io", "hexo.io", "gov.cn", "cloudflare.com", "ubuntu.com",
                "docker.com", "jekyll.com", "localhost", "blogspot.com", "tmall.com",
-               "wordpress.cn", "wordpress.org", "baidu.com"
+               "wordpress.cn", "wordpress.org", "baidu.com", "blogger.com"
                ]
 
 
@@ -72,5 +73,5 @@ def to_graphql_data():
                     "to": friend
                 })
 
-    with open('site/src/data.json', 'w') as f:
+    with open('site/src/graph.json', 'w') as f:
         json.dump(data, f)

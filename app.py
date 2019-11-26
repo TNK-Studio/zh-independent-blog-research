@@ -1,59 +1,59 @@
-import json
 import os
-import asyncio
-import sys
-
-from urllib.parse import urljoin
+import json
+import time
+from task import task
+from multiprocessing import cpu_count, Pool, Manager, Queue
+# from bloom_filter import BloomFilter
 from urllib.parse import urlparse
-from queue import Queue
-from get import get_data
-from itertools import chain
 
-from schema import SiteInfoItem
+# bloom = BloomFilter(max_elements=1000000, error_rate=0.1)
+# some bug in bloom
 
 
-def app(count, batch_size):
-    q = Queue()
+def app():
+    if not os.path.exists('data'):
+        os.mkdir('data')
 
-    # init queue with last run-status
+    bloom = set()
+    list(map(bloom.add, [site[:-5] for site in os.listdir('data')]))
+
+    manager = Manager()
+    q = manager.Queue()
+    print(q.qsize())
+    # 初始化的对列
     with open('run_status.json', 'r') as f:
         last_run_status = json.load(f)
         list(map(q.put, last_run_status['q']))
 
-    if not os.path.exists('data'):
-        os.mkdir('data')
-    visited_sites = set([site[:-5] for site in os.listdir('data')])
-
-    while not q.empty() and count > 0:
-        try:
-            urls = [q.get() for i in range(batch_size) if not q.empty()]
-            print(urls)
-            r = get_data(urls)
-            # update visited site
-            list(map(visited_sites.add, [
-                 urlparse(url).netloc for url in urls]))
-            all_friend_links = list(chain(*[site.friends for site in r]))
-
-            # if site has been visited, do not put in queue
-            link_need_to_put_in_q = [link for link in all_friend_links if urlparse(
-                link).netloc not in visited_sites]
-            list(map(q.put, link_need_to_put_in_q))
-            count -= batch_size
-            print(count, q.qsize())
-        except Exception as e:
-            with open("run_status.json", 'w') as f:
-                json.dump({
-                    "q": list(q.queue)
-                }, f)
-            print(e)
-            print("exit by error")
-            break
-    else:
-        with open("run_status.json", 'w') as f:
+    print(q.qsize())
+    try:
+        while not q.empty():
+            with Pool(cpu_count()) as pool:
+                ress = [pool.apply_async(task, (q, bloom, 8))
+                        for _ in range(cpu_count()//2)]
+                for res in ress:
+                    pid, new_links = res.get(timeout=100)
+                    link_need_to_put_in_q = [link for link in new_links if urlparse(
+                        link).netloc not in bloom]
+                    print(f'{pid} 完成了一批任务，新链接加入队列：{link_need_to_put_in_q}')
+                    list(map(q.put, link_need_to_put_in_q))
+                    print(q.qsize())
+    except Exception as e:
+        print(e)
+        with open('run_status.json', 'r') as f:
+            r = []
+            while not q.empty():
+                r.append(q.get())
             json.dump({
-                "q": list(q.queue)
+                'q': r
             }, f)
+        pass
 
 
 if __name__ == "__main__":
-    app(8, 8)
+    start = time.time()
+    print(start)
+    app()
+    end = time.time()
+    print(end)
+    print(end-start)

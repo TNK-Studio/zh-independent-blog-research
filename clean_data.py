@@ -6,10 +6,10 @@ from utils import PASS_DOMAIN
 class Cleaner:
     def __init__(self, path):
         self.path = path
-        self.all_sites = iter(os.listdir(path))
+        self.all_sites = os.listdir(path)
 
     def clear_pass_domain_data(self):
-        for i in self.all_sites:
+        for i in iter(self.all_sites):
             if any([i.endswith(f"{domain}.json") for domain in PASS_DOMAIN]):
                 os.remove(os.path.join(self.path, i))
                 print(f"{i} has been cleaned")
@@ -30,10 +30,30 @@ class Cleaner:
                 data['q'].remove(url)
                 print(f'{url} has been removed')
         with open('run_status.json', 'w') as f:
-            json.dump(data,f)
+            json.dump(data, f)
+
+    def fix_q(self):
+        res = []
+        visited_site = set()
+        for itemdir in iter(self.all_sites):
+            try:
+                with open('data/'+itemdir, 'r') as f:
+                    item = json.load(f)
+                    visited_site.add(item['url'])
+                    res.extend(item['friends'])
+            except Exception:
+                print(f"打开 {itemdir} 失败")
+
+        new_q = list(set(res) - visited_site)
+        print(f"fix url queue,count :{len(new_q)}")
+        with open('run_status.json', 'w') as f:
+            json.dump({
+                'q': new_q
+            }, f)
 
 
 if __name__ == "__main__":
     c = Cleaner('data')
     c.clear_pass_domain_data()
     c.clean_run_status()
+    c.fix_q()

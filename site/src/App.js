@@ -47,9 +47,6 @@ export default function App() {
     }
   };
   return (<>
-    <div>
-      search
-    </div>
     <Graph
       graph={graph}
       options={options}
