@@ -2,3 +2,4 @@ data
 html
 .vscode
 __pycache__
+.idea/
