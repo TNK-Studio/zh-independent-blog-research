@@ -52,3 +52,22 @@ yarn
 ```
 python clean_data.py
 ```
+
+### 如何判断一个站点是否是中文独立博客
+
+在 `is_site_a_zh_i9t_blog` 中内置模型了 `is_zh_i9t_blog.pkl` 模型。可以直接使用，如果觉得效果不好，可以自己获取数据，重新训练。
+
++ 获取训练数据
+
+从 `is_site_a_zh_i9t_blog` 下的  top100 中文站点, top500 站点，和独立博客列中获取训练数据。
+会先请求站点获取数据，只用了协程比较慢。
+
+```
+python get_data_set.py
+```
+
++ 训练&获取模型
+从 `dataset.json` 中获取数据训练，保存为 `is_zh_i9t_blog.pkl`
+```
+python is_zh_i9t_blog.py
+```

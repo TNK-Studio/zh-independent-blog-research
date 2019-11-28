@@ -251,3 +251,15 @@ def main():
         args = [(urls[i:i + 8], 1) for i in range(0, len(urls), 8)]
         for links, flag in args:
             get_data(links, flag)
+
+    data_path = os.path.join(os.path.dirname(__file__), 'data')
+
+    data_set_file_path = os.path.join(
+        os.path.dirname(__file__), 'dataset.json')
+    r = []
+    for ddir in iter(os.listdir(data_path)):
+        with open(os.path.join(data_path, ddir)) as f:
+            d = json.load(f)
+            r.append(d)
+    with open(data_set_file_path, 'w') as f:
+        json.dump(r, f)
