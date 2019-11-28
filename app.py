@@ -2,7 +2,7 @@ import os
 import json
 import time
 from task import task
-from multiprocessing import cpu_count, Pool, Manager, Queue
+from multiprocessing import cpu_count, Pool, Manager, Queue, TimeoutError
 # from bloom_filter import BloomFilter
 from urllib.parse import urlparse
 
@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 # some bug in bloom
 
 
-def app():
+def app(unlimit=False):
     if not os.path.exists('data'):
         os.mkdir('data')
 
@@ -32,12 +32,20 @@ def app():
                 ress = [pool.apply_async(task, (q, bloom, 8))
                         for _ in range(cpu_count()//2)]
                 for res in ress:
-                    pid, new_links = res.get(timeout=100)
-                    link_need_to_put_in_q = [link for link in new_links if urlparse(
-                        link).netloc not in bloom]
-                    print(f'{pid} 完成了一批任务，新链接加入队列：{link_need_to_put_in_q}')
-                    list(map(q.put, link_need_to_put_in_q))
-                    print(q.qsize())
+                    try:
+                        pid, new_links = res.get(timeout=100)
+                        link_need_to_put_in_q = [link for link in new_links if urlparse(
+                            link).netloc not in bloom]
+                        print(f'{pid} 完成了一批任务')
+                        if unlimit:
+                            list(map(q.put, link_need_to_put_in_q))
+                            print(f'新链接加入队列：{link_need_to_put_in_q}')
+                        print(q.qsize())
+                    except Exception as e:
+                        print("some task error")
+                        # fixme
+                        print(e)
+
     except Exception as e:
         print(e)
         with open('run_status.json', 'r') as f:
@@ -53,7 +61,7 @@ def app():
 if __name__ == "__main__":
     start = time.time()
     print(start)
-    app()
+    app(unlimit=True)
     end = time.time()
     print(end)
     print(end-start)

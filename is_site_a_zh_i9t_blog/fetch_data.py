@@ -1,18 +1,15 @@
 import os
 import requests
 import re
+import json
 
 from dataclasses import dataclass
 from urllib.parse import urljoin
 from urllib.parse import urlparse
-from requests_html import AsyncHTMLSession
-# from requests_html import HTMLSession
+from requests_html import AsyncHTMLSession, HTML
 from utils import PASS_DOMAIN, geuss_link_url, rm_slash, has_url_html_been_fetched
 from itertools import chain
-from schema import SiteInfoItem
-
-from is_site_a_zh_i9t_blog import test
-
+from multiprocessing import cpu_count, Pool, Manager, Queue, TimeoutError
 
 asession = AsyncHTMLSession()
 adapter = requests.adapters.HTTPAdapter(pool_connections=100, pool_maxsize=100)
@@ -44,18 +41,13 @@ re_map = {
 }
 
 
-# 标题中出现这些关键词时，基本上不会是个人博客
-BLACK_WORDS = set({
-    "SEO", "官方", "导航", "网址"
-})
-
-
 class SiteFeatureTransformer:
-    def __init__(self, url, r, friends):
+    def __init__(self, url, r, friends, is_zh_i9t_blog):
         self.text = r.html.text
         self.r = r
         self.url = url
         self.friends = friends
+        self.is_zh_i9t_blog = is_zh_i9t_blog
 
     @property
     def domain(self):
@@ -79,7 +71,27 @@ class SiteFeatureTransformer:
 
     @property
     def rss(self):
-        pass
+        # SEE https://github.com/DIYgod/RSSHub-Radar/blob/78ec729b98b2334bebdb75efc53370a9a908af91/src/js/content/utils.js#L39
+        RSS_TYPES = [
+            'application/rss+xml',
+            'application/atom+xml',
+            'application/rdf+xml',
+            'application/rss',
+            'application/atom',
+            'application/rdf',
+            'text/rss+xml',
+            'text/atom+xml',
+            'text/rdf+xml',
+            'text/rss',
+            'text/atom',
+            'text/rdf',
+        ]
+        type_links = self.r.html.find('link[type]')
+        if type_links:
+            for link in type_links:
+                link_type = link.attrs.get("type", None)
+                if link_type and link_type in set(RSS_TYPES):
+                    return link.attrs.get("href")
         return ""
 
     @property
@@ -96,15 +108,16 @@ class SiteFeatureTransformer:
 
     @property
     def feature(self):
-        feature_has = {k: any([re_item.search(self.text)
-                               for re_item in res]) for k, res in re_map.items()}
-        feature_has["has_generator"] = bool(self.generator != 'unknown')
-        feature_has["has_rss"] = bool(self.rss)
+        feature_has = {k: int(any([re_item.search(self.text)
+                                   for re_item in res])) for k, res in re_map.items()}
+        feature_has["has_generator"] = int(bool(self.generator != 'unknown'))
+        feature_has["has_rss"] = int(bool(self.rss))
 
         feature = {
             "len_friends":  len(self.friends),
-            # "tld": self.tld,
-            # "sld": self.sld,
+            "tld": self.tld,
+            "sld": self.sld,
+            "is_zh_i9t_blog": int(bool(self.is_zh_i9t_blog))
         }
         return {**feature_has, **feature}
 
@@ -116,11 +129,16 @@ class SiteFeatureTransformer:
             "rss": self.rss,
             "generator": self.generator,
             "friends": self.friends,
-            "url": self.url,
-            "tld": self.tld,
-            "sld": self.sld
+            "url": self.url
         }
         return {**feature, **data}
+
+    def save_data_to_file(self):
+        p = os.path.join('is_site_a_zh_i9t_blog',
+                         'data', f'{self.domain}.json')
+        if not os.path.exists(p):
+            with open(p, 'w') as f:
+                json.dump(self.to_data(), f)
 
 
 def save_html(domain, html):
@@ -129,17 +147,16 @@ def save_html(domain, html):
         f.write(html)
 
 
-def get_data(urls):
-    res = get_frineds_and_res(urls)
+def get_data(urls, is_zh_i9t_blog=False):
+    res = get_frineds_and_res(urls, is_zh_i9t_blog)
     data = []
     for url, friends, r in res:
-        site_feature = SiteFeatureTransformer(r=r, url=url, friends=friends)
-        if test(site_feature.feature):
-            site = SiteInfoItem(**site_feature.to_data())
-            save_html(site.domain, str(r.html.html))
-            data.append(site)
-        else:
-            print('{} maybe not personal zh blog'.format(url))
+        site_feature = SiteFeatureTransformer(
+            r=r, url=url, friends=friends, is_zh_i9t_blog=is_zh_i9t_blog)
+        site = site_feature.to_data()
+        site_feature.save_data_to_file()
+        save_html(site['domain'], str(r.html.html))
+        data.append(site)
     return data
 
 
@@ -147,6 +164,7 @@ def get_url_html(url):
     async def f():
         # print("get:{}".format(url))
         try:
+            # print(url)
             r = await asession.get(url, timeout=10)
             return r
         except requests.exceptions.ConnectTimeout:
@@ -158,12 +176,16 @@ def get_url_html(url):
     return f
 
 
-def get_frineds_and_res(urls):
+def get_frineds_and_res(urls, is_zh_i9t_blog=False):
     """
     找到给定 url 的友情链接列表,返回友链 & 友链页面 html
     """
-    urls = [url for url in urls if not has_url_html_been_fetched(url)]
-    all_urls = list(chain(*[geuss_link_url(url) for url in urls]))
+    all_urls = []
+    # urls = [url for url in urls if not has_url_html_been_fetched(url)]
+    if is_zh_i9t_blog:
+        all_urls = list(chain(*[geuss_link_url(url) for url in urls]))
+    else:
+        all_urls = urls
     res = []
     try:
         results = asession.run(*[get_url_html(url)
@@ -174,48 +196,58 @@ def get_frineds_and_res(urls):
             index_rhtml = None
             for r in results:
                 if r:
+                    # print(r.status_code)
                     if friends and index_rhtml:
                         break
                     elif r.status_code == 200 and urlparse(r.url).netloc == urlparse(url).netloc:
                         if not friends:
-                            pass_domain = PASS_DOMAIN + \
-                                [urlparse(r.url).netloc]
+                            # + PASS_DOMAIN
+                            pass_domain = [
+                                urlparse(r.url).netloc] + PASS_DOMAIN
+                            out_links = [link for link in r.html.absolute_links if urlparse(
+                                link).netloc != urlparse(url).netloc]
                             friends = list(
-                                map(lambda url: rm_slash(url), r.html.absolute_links))
-
+                                map(lambda url: rm_slash(url), out_links))
                             friends = list(filter(lambda url: all([url.find(
                                 pdomain) == -1 for pdomain in pass_domain]) & (urlparse(url).path == ""), set(friends)))
-                        if not index_rhtml and rm_slash(r.url) == url:
+
+                            print(friends)
+                        if not index_rhtml and rm_slash(r.url) == rm_slash(url):
                             index_rhtml = r
                 else:
                     pass
-            if friends and index_rhtml:
+            # print(url, friends, index_rhtml)
+            if is_zh_i9t_blog:
+                if friends and index_rhtml:
+                    res.append((url, friends, index_rhtml))
+            elif index_rhtml:
                 res.append((url, friends, index_rhtml))
+
     except Exception as e:
         print(e)
     finally:
+        # print(res)
         return res
 
 
-if __name__ == "__main__":
-    urls = ["https://www.magicican.com",
-            "https://elfgzp.cn",
-            "https://ruterly.com",
-            "https://www.tsuna.moe"]
-    data = {
-        "has_archive": 0,
-        "has_tag": 1,
-        "has_category": 0,
-        "has_about": 1,
-        "has_theme": 1,
-        "has_zh_text": 1,
-        "has_blog_text": 1,
-        "has_generator": 1,
-        "has_rss": 1,
-        "len_friends": 1
-        # "tld": "com",
-        # "sld": "1a23"
-    }
+def main():
+    p0 = os.path.join(os.path.dirname(__file__), 'top500site.json')
+    with open(p0, 'r') as f:
+        urls = json.load(f)
+        args = [(urls[i:i + 8], 0) for i in range(0, len(urls), 8)]
+        for links, flag in args:
+            get_data(links, flag)
 
-    print(test(data))
-    # get_data(urls)
+    p1 = os.path.join(os.path.dirname(__file__), 'top100zh_site.json')
+    with open(p1, 'r') as f:
+        urls = json.load(f)
+        args = [(urls[i:i + 8], 0) for i in range(0, len(urls), 8)]
+        for links, flag in args:
+            get_data(links, flag)
+
+    p2 = os.path.join(os.path.dirname(__file__), 'zh_i9t_blog_list.json')
+    with open(p2, 'r') as f:
+        urls = json.load(f)
+        args = [(urls[i:i + 8], 1) for i in range(0, len(urls), 8)]
+        for links, flag in args:
+            get_data(links, flag)

@@ -1,4 +1,7 @@
 data
+data.bak
 html
+html.bak
+*.bak
 .vscode
 __pycache__

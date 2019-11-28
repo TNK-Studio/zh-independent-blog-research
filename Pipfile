@@ -6,6 +6,9 @@ name = "pypi"
 [packages]
 requests-html = "*"
 datafiles = "*"
+scikit-learn = "*"
+pandas = "*"
+joblib = "*"
 
 [dev-packages]
 "autopep8" = "*"

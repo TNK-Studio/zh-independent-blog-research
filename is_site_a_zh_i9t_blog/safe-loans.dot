@@ -1,0 +1,21 @@
+digraph Tree {
+node [shape=box, style="filled, rounded", color="black", fontname=helvetica] ;
+edge [fontname=helvetica] ;
+0 [label="len_friends <= 0.5\ngini = 0.283\nsamples = 158\nvalue = [27, 131]\nclass = safe", fillcolor="#62b1ea"] ;
+1 [label="gini = 0.0\nsamples = 15\nvalue = [15, 0]\nclass = not safe", fillcolor="#e58139"] ;
+0 -> 1 [labeldistance=2.5, labelangle=45, headlabel="True"] ;
+2 [label="len_friends <= 16.5\ngini = 0.154\nsamples = 143\nvalue = [12, 131]\nclass = safe", fillcolor="#4ba6e7"] ;
+0 -> 2 [labeldistance=2.5, labelangle=-45, headlabel="False"] ;
+3 [label="sld <= 0.5\ngini = 0.075\nsamples = 129\nvalue = [5, 124]\nclass = safe", fillcolor="#41a1e6"] ;
+2 -> 3 ;
+4 [label="gini = 0.0\nsamples = 1\nvalue = [1, 0]\nclass = not safe", fillcolor="#e58139"] ;
+3 -> 4 ;
+5 [label="gini = 0.061\nsamples = 128\nvalue = [4, 124]\nclass = safe", fillcolor="#3fa0e6"] ;
+3 -> 5 ;
+6 [label="has_generator <= 0.5\ngini = 0.5\nsamples = 14\nvalue = [7, 7]\nclass = not safe", fillcolor="#ffffff"] ;
+2 -> 6 ;
+7 [label="gini = 0.0\nsamples = 7\nvalue = [7, 0]\nclass = not safe", fillcolor="#e58139"] ;
+6 -> 7 ;
+8 [label="gini = 0.0\nsamples = 7\nvalue = [0, 7]\nclass = safe", fillcolor="#399de5"] ;
+6 -> 8 ;
+}

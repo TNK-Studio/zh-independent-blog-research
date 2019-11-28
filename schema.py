@@ -5,21 +5,34 @@ from urllib.parse import urlparse
 
 
 @datafile("data/{self.domain}.json")
-# @dataclass
+@dataclass(init=True)
 class SiteInfoItem:
     url: str = ''
-    name: Optional[str] = None
-    domain: str = field(init=False)
-    dtl: str = field(init=False)
-    rss: Optional[str] = None
-    generator: Optional[str] = None
-    host_server: Optional[str] = None
-    comment_server: Optional[str] = None
-    friends: Optional[List[str]] = None
+    name: Optional[str] = ''
+    domain: Optional[str] = ''
+    rss: Optional[str] = ''
+    generator: Optional[str] = ''
+    friends: Optional[List[str]] = field(default_factory=list)
+    #
+    host_server: Optional[str] = ''
+    comment_server: Optional[str] = ''
 
-    def __post_init__(self):
-        self.domain = urlparse(self.url).netloc
-        self.dtl = self.domain.split(".")[-1]
+    # features
+    tld: Optional[str] = ''
+    sld: Optional[str] = ''
+
+    len_friends: int = 0
+
+    has_rss: bool = False
+    has_generator: bool = False
+
+    has_archive: bool = False
+    has_tag: bool = False
+    has_category: bool = False
+    has_about: bool = False
+    has_theme: bool = False
+    has_zh_text: bool = False
+    has_blog_text: bool = False
 
 
 if __name__ == "__main__":
