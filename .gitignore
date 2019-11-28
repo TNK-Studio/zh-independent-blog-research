@@ -5,3 +5,4 @@ html.bak
 *.bak
 .vscode
 __pycache__
+.idea/
