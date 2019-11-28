@@ -2,6 +2,7 @@ data
 data.bak
 html
 html.bak
+# run_status.json
 *.bak
 .vscode
 __pycache__

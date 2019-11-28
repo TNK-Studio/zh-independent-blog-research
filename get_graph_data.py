@@ -21,16 +21,20 @@ def to_graphql_data():
     url_friends_map = {}
     for itemdir in iter(os.listdir('data')):
         if itemdir.endswith('.json'):
-            with open('data/'+itemdir, 'r') as f:
-                item = json.load(f)
-                url_set.add(item['url'])
-                data['nodes'].append({
-                    'id': item['url'],
-                    'label': item['url'],
-                    'title': item['name'],
-                    'group': item['url'].split(".")[-1]
-                })
-                url_friends_map[item['url']] = item['friends']
+            try:
+                with open('data/'+itemdir, 'r') as f:
+                    item = json.load(f)
+                    url_set.add(item['url'])
+                    data['nodes'].append({
+                        'id': item['url'],
+                        'label': item['url'],
+                        'title': item['name'],
+                        'group': item['url'].split(".")[-1]
+                    })
+                    url_friends_map[item['url']] = item['friends']
+            except Exception as e:
+                print(e)
+                print(item['url'])
 
     for url, friends in url_friends_map.items():
         for friend in friends:
