@@ -134,7 +134,7 @@ def get_data(urls):
     data = []
     for url, friends, r in res:
         site_feature = SiteFeatureTransformer(r=r, url=url, friends=friends)
-        if test(site_feature.feature):
+        if site_feature.feature['has_zh_text'] and test(site_feature.feature) :
             site = SiteInfoItem(**site_feature.to_data())
             save_html(site.domain, str(r.html.html))
             data.append(site)
