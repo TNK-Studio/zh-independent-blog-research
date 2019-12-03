@@ -1,5 +1,5 @@
 import os
-import json 
+import json
 import re
 from urllib.parse import urlparse, urljoin
 
@@ -35,6 +35,9 @@ class SiteFeatureTransformer:
         self.url = url
         self.friends = friends
 
+    def url_trans(self, url):
+        return urljoin(self.url, url) if url.startswith('/') else url
+
     @property
     def domain(self):
         return urlparse(self.url).netloc
@@ -54,6 +57,13 @@ class SiteFeatureTransformer:
             return title.text
         else:
             return 'unknown'
+
+    @property
+    def description(self):
+        find_in_meta = self.r.html.find("meta[name='description']", first=True)
+        if find_in_meta:
+            return find_in_meta.attrs.get('content', '')
+        return ''
 
     @property
     def rss(self):
@@ -77,7 +87,7 @@ class SiteFeatureTransformer:
             for link in type_links:
                 link_type = link.attrs.get("type", None)
                 if link_type and link_type in set(RSS_TYPES):
-                    return link.attrs.get("href")
+                    return self.url_trans(link.attrs.get("href"))
         return ""
 
     @property
@@ -87,15 +97,13 @@ class SiteFeatureTransformer:
         shortcut_icon = self.r.html.find(
             "link[rel='shortcut icon']", first=True)
 
-        def url_trans(x): return urljoin(
-            self.url, x) if x.startswith('/') else x
         if icon:
             icon = icon.attrs.get('href', _default)
             # 相对路径时，替换成绝对路径
-            icon = url_trans(icon)
+            icon = self.url_trans(icon)
         if shortcut_icon:
             shortcut_icon = shortcut_icon.attrs.get('href', _default)
-            shortcut_icon = url_trans(shortcut_icon)
+            shortcut_icon = self.url_trans(shortcut_icon)
         return icon or shortcut_icon or _default
 
     @property
@@ -131,6 +139,7 @@ class SiteFeatureTransformer:
             "name": self.name,
             "rss": self.rss,
             "generator": self.generator,
+            "description": self.description,
             "icon": self.icon,
             "friends": self.friends,
             "url": self.url,

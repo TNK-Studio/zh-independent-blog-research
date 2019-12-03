@@ -15,6 +15,7 @@ class SiteInfoItem:
     icon: Optional[str] = ''
     rss: Optional[str] = ''
     generator: Optional[str] = ''
+    description: Optional[str] = ''
     friends: Optional[List[str]] = field(default_factory=list)
     # not use
     host_server: Optional[str] = ''
