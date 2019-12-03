@@ -1,3 +1,7 @@
+"""
+抓取&处理数据
+"""
+
 import os
 import requests
 import re
@@ -10,6 +14,7 @@ from requests_html import AsyncHTMLSession
 from utils import PASS_DOMAIN, geuss_link_url, rm_slash, has_url_html_been_fetched
 from itertools import chain
 from schema import SiteInfoItem
+from site_feature import SiteFeatureTransformer
 
 from is_site_a_zh_i9t_blog import test
 
@@ -20,107 +25,10 @@ asession.mount('http://', adapter)
 asession.mount('https://', adapter)
 
 
-re_zh_text = zh_re = re.compile('[\u4e00-\u9fa5]')
-re_archive_zh = re.compile('归档')
-re_archive_en = re.compile('archive')
-re_tag_zh = re.compile('标签')
-re_tag_en = re.compile('tag')
-re_cate_zh = re.compile('分类')
-re_cate_en = re.compile('categor')
-re_about_zh = re.compile('关于')
-re_about_en = re.compile('about')
-re_theme_en = re.compile('theme')
-re_blog_text_zh = re.compile('博客')
-re_blog_text_en = re.compile('blog')
-
-re_map = {
-    "has_archive": [re_archive_en, re_about_zh],
-    "has_tag": [re_tag_en, re_about_zh],
-    "has_category": [re_cate_en, re_cate_zh],
-    "has_about": [re_about_zh, re_about_en],
-    "has_theme": [re_theme_en],
-    "has_zh_text": [re_zh_text],
-    "has_blog_text": [re_blog_text_en, re_blog_text_zh]
-}
-
-
 # 标题中出现这些关键词时，基本上不会是个人博客
 BLACK_WORDS = set({
     "SEO", "官方", "导航", "网址"
 })
-
-
-class SiteFeatureTransformer:
-    def __init__(self, url, r, friends):
-        self.text = r.html.text
-        self.r = r
-        self.url = url
-        self.friends = friends
-
-    @property
-    def domain(self):
-        return urlparse(self.url).netloc
-
-    @property
-    def tld(self):
-        return self.domain.split(".")[-1]
-
-    @property
-    def sld(self):
-        return self.domain.split(".")[-2]
-
-    @property
-    def name(self):
-        title = self.r.html.find('title', first=True)
-        if title:
-            return title.text
-        else:
-            return 'unknown'
-
-    @property
-    def rss(self):
-        pass
-        return ""
-
-    @property
-    def generator(self):
-        find_in_meta = self.r.html.find("meta[name='generator']", first=True)
-        if find_in_meta:
-            return find_in_meta.attrs.get('content', 'unknown')
-
-        find_in_html_text = self.r.html.search("Powered by{}<a{}>{}</a>")
-        if find_in_html_text:
-            return find_in_html_text[2]
-        else:
-            return 'unknown'
-
-    @property
-    def feature(self):
-        feature_has = {k: any([re_item.search(self.text)
-                               for re_item in res]) for k, res in re_map.items()}
-        feature_has["has_generator"] = bool(self.generator != 'unknown')
-        feature_has["has_rss"] = bool(self.rss)
-
-        feature = {
-            "len_friends":  len(self.friends),
-            # "tld": self.tld,
-            # "sld": self.sld,
-        }
-        return {**feature_has, **feature}
-
-    def to_data(self):
-        feature = self.feature
-        data = {
-            "domain": self.domain,
-            "name": self.name,
-            "rss": self.rss,
-            "generator": self.generator,
-            "friends": self.friends,
-            "url": self.url,
-            "tld": self.tld,
-            "sld": self.sld
-        }
-        return {**feature, **data}
 
 
 def save_html(domain, html):
@@ -134,8 +42,11 @@ def get_data(urls):
     data = []
     for url, friends, r in res:
         site_feature = SiteFeatureTransformer(r=r, url=url, friends=friends)
-        if site_feature.feature['has_zh_text'] and test(site_feature.feature) :
+        if site_feature.feature['has_zh_text'] and test(site_feature.feature):
             site = SiteInfoItem(**site_feature.to_data())
+            site_path = f'data/{site.domain}.json'
+            with open(site_path, 'w') as f:
+                site.save_to_file(f)
             save_html(site.domain, str(r.html.html))
             data.append(site)
         else:

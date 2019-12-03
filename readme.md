@@ -29,10 +29,14 @@ yarn
     pipenv run app.py
     ```
 
-+ 合成图数据 > site/src/data.json
++ 合成图数据
+
+输出 `site/src/data.json` 和 `site/src/graph.json` 供前端使用。
+
     ```shell
     python get_graph_data.py
     ```
+    
 
 + 构建前端
 
@@ -42,6 +46,15 @@ yarn
     yarn build # 构建生产版本
     yarn serve # 本地查看部署的站点（build 后）
     ```
+
++ 更新数据
+
+在 site_feature.py 中添加新的 feature ,从保存的 html 中提取新数据
+    ```
+    pipenv run  python parse_data.py
+    ```
+然后重新合成图数据
+
 
 ## 说明
 

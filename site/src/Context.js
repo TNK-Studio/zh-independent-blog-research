@@ -1,6 +1,6 @@
 
 import { createContext } from "react";
-import React, { useState, useContext, useReducer } from "react";
+import React, { useReducer } from "react";
 import data from "./data.json"
 import graph from "./graph.json"
 
@@ -11,7 +11,7 @@ const value = {
 }
 
 let domainDataMap = {}
-data.map(item => {
+data.forEach(item => {
     let site = new URL(item.url)
     domainDataMap[site.hostname] = item
 })
@@ -40,14 +40,26 @@ const computeGraph = (domain, depth = 2) => {
             let domainList = domain.split('.')
             let tld = domainList[domainList.length - 1]
             if (site && !pushedUrl.has(site.url)) {
-                graphData.nodes.push({
+                let nodeData = {
                     "id": site.url,
-                    "label": site.url,
+                    "label": site.name,
                     "title": site.name,
                     "group": tld
-                })
+                }
+
+                if (pushedUrl.size < 30) {
+                    //  同屏节点少于 30 时，显示站点 icon
+                    nodeData = {
+                        ...nodeData,
+                        'shape': "circularImage",
+                        'image': site.icon,
+                        'brokenImage': '/favicon.ico'
+                    }
+                }
+
+                graphData.nodes.push(nodeData)
                 pushedUrl.add(site.url)
-                site.friends.map(link => {
+                site.friends.forEach(link => {
                     try {
                         let u = new URL(link)
                         addData2Graph(u.hostname, _depth)
