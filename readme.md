@@ -31,7 +31,7 @@ yarn
 
 + 合成图数据
 
-输出 `site/src/data.json` 和 `site/src/graph.json` 供前端使用。
+    输出 `site/src/data.json` 和 `site/src/graph.json` 供前端使用。
 
     ```shell
     python get_graph_data.py
@@ -49,11 +49,11 @@ yarn
 
 + 更新数据
 
-在 site_feature.py 中添加新的 feature ,从保存的 html 中提取新数据
+    在 site_feature.py 中添加新的 feature ,从保存的 html 中提取新数据
     ```
     pipenv run  python parse_data.py
     ```
-然后重新合成图数据
+    然后重新合成图数据
 
 
 ## 说明
@@ -62,9 +62,9 @@ yarn
 如果因意外情况崩溃，可以使用下如下命令恢复运行状态，继续爬取。
 
 + 获取未完成的队列 & 清理数据
-```
-python clean_data.py
-```
+    ```
+    python clean_data.py
+    ```
 
 ### 如何判断一个站点是否是中文独立博客
 
@@ -72,15 +72,17 @@ python clean_data.py
 
 + 获取训练数据
 
-从 `is_site_a_zh_i9t_blog` 下的  top100 中文站点, top500 站点，和独立博客列表中获取训练数据。
-会先请求站点获取数据，只用了协程比较慢。
+    从 `is_site_a_zh_i9t_blog` 下的  top100 中文站点, top500 站点，和独立博客列表中获取训练数据。
+    会先请求站点获取数据，只用了协程比较慢。
 
-```
-python get_data_set.py
-```
+    ```
+    python get_data_set.py
+    ```
 
 + 训练&获取模型
-从 `dataset.json` 中获取数据训练，保存为 `is_zh_i9t_blog.pkl`
-```
-python is_zh_i9t_blog.py
-```
+
+    从 `dataset.json` 中获取数据训练，保存为 `is_zh_i9t_blog.pkl`
+
+    ```
+    python is_zh_i9t_blog.py
+    ```
