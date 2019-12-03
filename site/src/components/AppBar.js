@@ -1,12 +1,13 @@
 import React, { useContext, useState } from 'react';
 import { fade, makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
+import Button from '@material-ui/core/Button';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import InputBase from '@material-ui/core/InputBase';
 import MenuItem from '@material-ui/core/MenuItem';
 import SearchIcon from '@material-ui/icons/Search';
-
+import { Link } from 'react-router-dom';
 
 import Select from '@material-ui/core/Select';
 import FormControl from '@material-ui/core/FormControl';
@@ -93,7 +94,10 @@ export default function PrimarySearchAppBar() {
                         <MenuIcon />
                     </IconButton> */}
                     <Typography className={classes.title} variant="h6" noWrap>
-                        中文独立博客调研
+                        <Link to="/" style={{
+                            textDecoration: 'none',
+                            color: '#fff'
+                        }}>中文独立博客调研</Link>
                     </Typography>
                     <div className={classes.search}>
                         <div className={classes.searchIcon}>
@@ -144,6 +148,10 @@ export default function PrimarySearchAppBar() {
                             {/* <FormHelperText>关系网深度</FormHelperText> */}
                         </FormControl>
                     </div>
+                    <Link to='report' component={Button}>
+                        报告
+                    </Link>
+
                     <div className={classes.grow} />
                 </Toolbar>
             </AppBar>
