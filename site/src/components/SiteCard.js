@@ -6,8 +6,18 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Button from '@material-ui/core/Button';
+import RSSIcon from '@material-ui/icons/RssFeed'
 import Typography from '@material-ui/core/Typography';
 import { AppContext } from '../Context'
+import Avatar from '@material-ui/core/Avatar';
+import CardHeader from '@material-ui/core/CardHeader';
+import IconButton from '@material-ui/core/IconButton';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import FriendsIcon from '@material-ui/icons/People';
+import CloseIcon from '@material-ui/icons/Close';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import HttpsIcon from '@material-ui/icons/Https';
+import { Divider } from '@material-ui/core';
 
 
 const useStyles = makeStyles({
@@ -30,31 +40,38 @@ export default function MediaCard() {
     return (
         <>
             {selectedSite && <Card className={classes.card}>
-                <CardActionArea>
-                    <CardMedia
-                        className={classes.media}
-                        image="/static/images/cards/contemplative-reptile.jpg"
-                        title="Contemplative Reptile"
-                    />
-                    <CardContent>
-                        <Typography gutterBottom variant="h5" component="h2">
-                            {selectedSite.name}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary" component="p">
-                            {selectedSite.url}
-                        </Typography>
-                    </CardContent>
-                </CardActionArea>
+                <CardHeader
+                    avatar={
+                        <Avatar aria-label="recipe" className={classes.avatar} src={selectedSite.icon} />
+                    }
+                    action={
+                        <div>
+                            <HttpsIcon style={{ color: selectedSite.url.startsWith("https") ? 'green' : 'gray', padding: 5 }} />
+                            <RSSIcon style={{ color: selectedSite.rss ? 'green' : 'gray', padding: 5 }} />
+                        </div>
+                    }
+                    title={selectedSite.name}
+                    subheader={selectedSite.url}
+                />
+                <CardContent>
+                    <Typography variant="body1" color="textSecondary" component="p">
+                        {selectedSite.description}
+                    </Typography>
+                    <br />
+                    <Typography variant="body2" color="textSecondary" component="p">
+                        生成器: {selectedSite.generator}
+                    </Typography>
+                </CardContent>
                 <CardActions>
-                    <Button size="small" color="primary" onClick={() => window.open(selectedSite.url)}>
-                        查看站点
-                    </Button>
-                    <Button size="small" color="primary" onClick={() => dispatch({ type: 'computeGraph' })}>
-                        查看好友关系
-                    </Button>
-                    <Button size="small" color="primary" onClick={() => dispatch({ type: 'clearCard' })}>
-                        关闭卡片
-                    </Button>
+                    <IconButton aria-label="查看" onClick={() => window.open(selectedSite.url)}>
+                        <OpenInNewIcon />
+                    </IconButton>
+                    <IconButton aria-label="好友" onClick={() => dispatch({ type: 'computeGraph' })}>
+                        <FriendsIcon />
+                    </IconButton>
+                    <IconButton aria-label="关闭" onClick={() => dispatch({ type: 'clearCard' })}>
+                        <CloseIcon />
+                    </IconButton>
                 </CardActions>
             </Card>
             }
