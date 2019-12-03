@@ -9,7 +9,6 @@ from queue import Queue
 from get import get_data
 from itertools import chain
 
-from schema import SiteInfoItem
 # from bloom_filter import BloomFilter
 
 
@@ -30,5 +29,5 @@ def task(q, bloom, batch_size):
 
 if __name__ == "__main__":
     # bloom = BloomFilter(max_elements=100000, error_rate=0.1)
-    bloom = set() # 过滤器中有些bug，目前还是采用集合来去重
+    bloom = set()  # 过滤器中有些bug，目前还是采用集合来去重
     task(Queue(), bloom, 8)

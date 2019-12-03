@@ -4,13 +4,13 @@ import graph from "../graph.json"
 import { AppContext, domainDataMap } from '../Context'
 
 
-export default function App() {
+export default function NetworkGraph() {
     const [network, setNetwork] = useState({})
-    const [maxNodeNum, setMaxNodeNum] = useState(() => {
+    const [maxNodeNum] = useState(() => {
         return parseInt(localStorage.getItem("maxNodeNum"))
     })
     const { state, dispatch } = useContext(AppContext)
-    const { domain, depth, graphData } = state
+    const { graphData } = state
 
     let _graphData
 

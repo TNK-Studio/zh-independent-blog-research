@@ -1,10 +1,10 @@
-import React, { useState, useContext, useReducer } from "react";
+import React from "react";
 import Graph from "./components/Graph";
 import Search from './components/Search';
 import SiteCard from './components/SiteCard'
 
 
-import { AppContext, AppContextProvider } from './Context'
+import { AppContextProvider } from './Context'
 
 
 export default function App() {
