@@ -11,7 +11,7 @@ from urllib.parse import urljoin
 from urllib.parse import urlparse
 from requests_html import AsyncHTMLSession, HTMLResponse
 # from requests_html import HTMLSession
-from utils import PASS_DOMAIN, geuss_link_url, rm_slash, has_url_html_been_fetched, url_trans
+from utils import PASS_DOMAIN, geuss_link_url, rm_slash, has_url_html_been_fetched, url_trans, test_blog, bcolors
 from itertools import chain
 from schema import SiteInfoItem
 from site_feature import SiteFeatureTransformer
@@ -25,12 +25,6 @@ asession.mount('http://', adapter)
 asession.mount('https://', adapter)
 
 
-# 标题中出现这些关键词时，基本上不会是个人博客
-BLACK_WORDS = set({
-    "SEO", "官方", "导航", "网址"
-})
-
-
 def save_html(domain, html):
     path = os.path.join('html', f'{domain}.html')
     with open(path, 'w') as f:
@@ -42,10 +36,10 @@ def get_data(urls):
     data = []
     for k, value in res.items():
         url = value['url']
-        friends = value.get('friends',[])
+        friends = value.get('friends', [])
         r = value['r']
         site_feature = SiteFeatureTransformer(r=r, url=url, friends=friends)
-        if site_feature.feature['has_zh_text']:# and test(site_feature.feature):
+        if site_feature.feature['has_zh_text'] and test_blog(site_feature.feature):
             site = SiteInfoItem(**site_feature.to_data())
             site_path = f'data/{site.domain}.json'
             with open(site_path, 'w') as f:
@@ -53,7 +47,7 @@ def get_data(urls):
             save_html(site.domain, str(r.html.html))
             data.append(site)
         else:
-            print('{} maybe not personal zh blog'.format(url))
+            print(f'{bcolors.WARNING}{url} maybe not personal zh blog{bcolors.ENDC}')
     return data
 
 

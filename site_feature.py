@@ -90,6 +90,21 @@ class SiteFeatureTransformer:
                 link_type = link.attrs.get("type", None)
                 if link_type and link_type in set(RSS_TYPES):
                     return self.url_trans(link.attrs.get("href"))
+
+        a_links = self.r.html.find('a')
+        re_check = '([^a-zA-Z]|^)rss([^a-zA-Z]|$)'
+        re_rss = r'\/(feed|rss|atom)(\.(xml|rss|atom))?$'
+        for a in a_links:
+            href = a.attrs.get('href', '')
+            title = a.attrs.get('title', '')
+            _class = a.attrs.get('class', '')
+            if href:
+                if any([
+                    re.match(re_rss, str(href), re.IGNORECASE),
+                    re.match(re_check, str(title), re.IGNORECASE),
+                    re.match(re_check, str(_class), re.IGNORECASE)
+                ]):
+                    return self.url_trans(href)
         return ""
 
     @property
@@ -122,7 +137,7 @@ class SiteFeatureTransformer:
 
     @property
     def feature(self):
-        feature_has = {k: any([re_item.search(self.text)
+        feature_has = {k: any([re_item.search(self.text, re.IGNORECASE)
                                for re_item in res]) for k, res in re_map.items()}
         feature_has["has_generator"] = bool(self.generator != 'unknown')
         feature_has["has_rss"] = bool(self.rss)
