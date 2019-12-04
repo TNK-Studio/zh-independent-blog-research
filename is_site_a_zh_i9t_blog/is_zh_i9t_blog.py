@@ -8,6 +8,7 @@ import joblib
 
 from sklearn.model_selection import train_test_split
 from sklearn import tree
+from sklearn.metrics import accuracy_score
 
 
 pkl_path = os.path.join(os.path.dirname(__file__), 'is_zh_i9t_blog.pkl')
@@ -23,8 +24,9 @@ def learn():
 
     y = df.is_zh_i9t_blog
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
-    clf = tree.DecisionTreeClassifier(max_depth=3)
+    clf = tree.DecisionTreeClassifier(max_depth=15)
     clf = clf.fit(X_train, y_train)
+    print(accuracy_score(y_test, clf.predict(X_test)))
     joblib.dump(clf, pkl_path)
     return clf
 

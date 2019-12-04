@@ -97,6 +97,8 @@ const GeneratorPie = () => {
         'Nuxt',
         'Typecho',
         'Ghost',
+        'Hugo',
+        'WordPress',
         'unknown'
     ]
     let seriesData = []

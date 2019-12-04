@@ -2,6 +2,7 @@ import os
 import json
 import re
 from urllib.parse import urlparse, urljoin
+from utils import rm_slash
 
 
 re_zh_text = zh_re = re.compile('[\u4e00-\u9fa5]')
@@ -29,11 +30,12 @@ re_map = {
 
 
 class SiteFeatureTransformer:
-    def __init__(self, url, r, friends):
+    def __init__(self, url, r, friends, is_zh_i9t_blog=True):
         self.text = r.html.text
         self.r = r
-        self.url = url
+        self.url = rm_slash(url)
         self.friends = friends
+        self.is_zh_i9t_blog = is_zh_i9t_blog
 
     def url_trans(self, url):
         return urljoin(self.url, url) if url.startswith('/') else url
@@ -144,7 +146,8 @@ class SiteFeatureTransformer:
             "friends": self.friends,
             "url": self.url,
             "tld": self.tld,
-            "sld": self.sld
+            "sld": self.sld,
+            "is_zh_i9t_blog": self.is_zh_i9t_blog
         }
         return {**feature, **data}
 

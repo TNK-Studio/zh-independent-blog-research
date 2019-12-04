@@ -4,18 +4,36 @@ import React, { useReducer } from "react";
 import data from "./data.json"
 import graph from "./graph.json"
 
+let domainDataMap = {}
+let blogSearcher = {}
+data.forEach(item => {
+    domainDataMap[item.domain] = item
+    blogSearcher[item.domain] = JSON.stringify(item)
+})
+
 
 const value = {
     domain: undefined,
     depath: 1,
+    q: undefined,
+    blogList: []
 }
 
-let domainDataMap = {}
-data.forEach(item => {
-    let site = new URL(item.url)
-    domainDataMap[site.hostname] = item
-})
 
+const queryBlog = (q) => {
+    let searchRes = Object.entries(blogSearcher).filter(item => {
+        let [key, value] = item
+        let qRegExp = new RegExp(q, 'i')
+        // 全局正则搜索
+        return value.search(qRegExp) > -1
+    }).map(item => {
+        let [key, value] = item
+        return domainDataMap[key]
+    })
+    let r = searchRes.slice(0, 10)
+    console.log(r)
+    return r
+}
 
 const computeGraph = (domain, depth = 2) => {
 
@@ -91,6 +109,25 @@ const AppContext = createContext({})
 
 const AppReducer = (state, action) => {
     switch (action.type) {
+        case 'setQ':
+            const { q } = action.payload
+            let blogList = queryBlog(q)
+            if (blogList.length === 1) {
+                let site = blogList[0]
+                return {
+                    ...state,
+                    domain: site.domain,
+                    selectedSite: site
+                }
+            } else {
+                return {
+                    ...state,
+                    q,
+                    blogList,
+                    selectedSite: undefined
+                }
+            }
+
         case ('setDomain'):
             const { domain } = action.payload
             return {
@@ -110,6 +147,7 @@ const AppReducer = (state, action) => {
             return {
                 ...state,
                 domain: (new URL(selectedSite.url)).hostname,
+                q: undefined,
                 selectedSite
             }
         case 'set':

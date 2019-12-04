@@ -15,6 +15,13 @@ PASS_DOMAIN = ["youtube.com", "wikipedia.org", "facebook.com", "twitter.com", "z
                ]
 
 
+def url_trans(base_url, url: str):
+    if url.startswith('/'):
+        return urljoin(base_url, url)
+    else:
+        return url
+
+
 def has_url_html_been_fetched(url):
     path = f"{urlparse(url).netloc}.html"
     return os.path.exists(path)
