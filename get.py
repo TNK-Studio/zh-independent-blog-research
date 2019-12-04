@@ -71,6 +71,7 @@ def get_frineds_page_link(r: HTMLResponse):
     在首页的 html 中，查询最有可能是友链的页面链接。如果友链内容嵌入在首页中则无法获取。
     """
     friend_page_link = r.html.find("a[href*='friend']")
+    friend_page_link.extend(r.html.find("a[href*='link']"))
     friend_page_link.extend(r.html.find("a[title*='友']"))
     if friend_page_link:
         for link in friend_page_link:
