@@ -31,7 +31,7 @@ def test_blog(feature: dict):
     feature_weights_map = {
         'has_archive': 15,
         'has_tag': 15,
-        'has_category': 1,
+        'has_category': 10,
         'has_about': 5,
         'has_theme': 5,
         # 'has_zh_text': 10,

@@ -141,6 +141,7 @@ class SiteFeatureTransformer:
                                for re_item in res]) for k, res in re_map.items()}
         feature_has["has_generator"] = bool(self.generator != 'unknown')
         feature_has["has_rss"] = bool(self.rss)
+        feature_has["has_blog_text"] = feature_has["has_blog_text"] or self.url.find('blog') > 0
 
         feature = {
             "len_friends":  len(self.friends),
