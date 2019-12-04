@@ -67,11 +67,11 @@ export default function NetworkGraph() {
     const events = {
         select: function (event) {
             var { nodes, edges } = event;
-            console.log(nodes, edges)
+            // console.log(nodes, edges)
         },
         click: function (event) {
             var { nodes, edges } = event;
-            console.log(nodes, edges)
+            // console.log(nodes, edges)
             if (nodes.length > 0) {
                 // window.open(nodes[0]);
                 let selectedURL = new URL(nodes[0])

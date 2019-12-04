@@ -16,7 +16,7 @@ def task(q, bloom, batch_size):
     pid = os.getpid()
     print(f"开启任务线程-{pid}:")
     urls = [q.get() for i in range(batch_size) if not q.empty()]
-    # urls = [url for url in urls if urlparse(url).netloc not in bloom]
+    urls = [url for url in urls if urlparse(url).netloc not in bloom]
     print(urls)
     r = get_data(urls)
     # update visited site

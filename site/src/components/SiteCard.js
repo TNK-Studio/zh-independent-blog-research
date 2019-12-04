@@ -36,10 +36,10 @@ const useStyles = makeStyles({
 export default function MediaCard() {
     const classes = useStyles();
     const { state, dispatch } = useContext(AppContext)
-    const { selectedSite } = state
+    const { selectedSite, q } = state
     return (
         <>
-            {selectedSite && <Card className={classes.card}>
+            {selectedSite && !q && <Card className={classes.card}>
                 <CardHeader
                     avatar={
                         <Avatar aria-label="recipe" className={classes.avatar} src={selectedSite.icon} />

@@ -35,6 +35,9 @@ class SiteInfoItem:
     has_zh_text: bool = False
     has_blog_text: bool = False
 
+    # y
+    is_zh_i9t_blog: bool = True
+
     def __post_init__(self):
         if not self.domain:
             self.domain = urlparse(self.url).netloc

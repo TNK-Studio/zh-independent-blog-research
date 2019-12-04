@@ -16,9 +16,10 @@ code {
 }
 
 #root {
-  height: 960px;
+  height: 100%;
 }
 
 .MuiAppBar-colorPrimary {
   background: #1e88e5!important;
+  box-shadow: none!important;
 }

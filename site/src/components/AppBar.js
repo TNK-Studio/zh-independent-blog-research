@@ -17,6 +17,10 @@ import { AppContext } from '../Context'
 const useStyles = makeStyles(theme => ({
     grow: {
         flexGrow: 1,
+        position: "fixed",
+        top: 0,
+        width: '100%',
+        zIndex: 10
     },
     menuButton: {
         marginRight: theme.spacing(2),
@@ -80,6 +84,7 @@ export default function PrimarySearchAppBar() {
     const classes = useStyles();
     const { state, dispatch } = useContext(AppContext)
     const [domain, setDomain] = useState(null)
+    console.log(state)
 
     return (
         <div className={classes.grow}>
@@ -106,7 +111,7 @@ export default function PrimarySearchAppBar() {
                         <InputBase
                             value={domain}
                             onChange={(e) => { setDomain(e.target.value) }}
-                            placeholder="a.blog.domain"
+                            placeholder="搜索"
                             classes={{
                                 root: classes.inputRoot,
                                 input: classes.inputInput,
@@ -115,9 +120,9 @@ export default function PrimarySearchAppBar() {
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
                                     dispatch({
-                                        type: 'setDomain',
+                                        type: 'setQ',
                                         payload: {
-                                            domain
+                                            q: domain
                                         }
                                     })
                                 }
@@ -148,8 +153,17 @@ export default function PrimarySearchAppBar() {
                             {/* <FormHelperText>关系网深度</FormHelperText> */}
                         </FormControl>
                     </div>
-                    <Link to='report' component={Button}>
+                    <Link to='report' component={Button} style={{
+                        textDecoration: 'none',
+                        color: '#fff'
+                    }}>
                         报告
+                    </Link>
+                    <Link to='about' component={Button} style={{
+                        textDecoration: 'none',
+                        color: '#fff'
+                    }}>
+                        关于
                     </Link>
 
                     <div className={classes.grow} />

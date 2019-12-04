@@ -15,6 +15,40 @@ PASS_DOMAIN = ["youtube.com", "wikipedia.org", "facebook.com", "twitter.com", "z
                ]
 
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
+def test_blog(feature: dict):
+    # ml 目前数据量较少，暂时采用评分判定。
+    feature_weights_map = {
+        'has_archive': 15,
+        'has_tag': 15,
+        'has_category': 1,
+        'has_about': 5,
+        'has_theme': 5,
+        # 'has_zh_text': 10,
+        'has_blog_text': 20,
+        'has_generator': 20,
+        'has_rss': 30,
+    }
+    return sum([feature_weights_map[k] for k, v in feature.items() if v and k in feature_weights_map.keys()]) >= 40
+
+
+def url_trans(base_url, url: str):
+    if url.startswith('/'):
+        return urljoin(base_url, url)
+    else:
+        return url
+
+
 def has_url_html_been_fetched(url):
     path = f"{urlparse(url).netloc}.html"
     return os.path.exists(path)
