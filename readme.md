@@ -58,6 +58,8 @@ yarn
 
 ## 说明
 
+这个项目受启发于 https://github.com/timqian/chinese-independent-blogs 
+
 项目初始阶段为了验证想法，希望依赖尽可能的少。没有引入 redis、数据库等组件。采用单机多进程+协程的方式爬取数据。采用文件系统存储数据。
 如果因意外情况崩溃，可以使用下如下命令恢复运行状态，继续爬取。
 
@@ -86,3 +88,7 @@ yarn
     ```
     python is_zh_i9t_blog.py
     ```
+
+## 设计思路&Roadmap
+
+更多的细节，参见：https://www.notion.so/55e54db856e343dd847dc207057ee751
