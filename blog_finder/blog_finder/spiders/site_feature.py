@@ -2,7 +2,8 @@ import os
 import json
 import re
 from urllib.parse import urlparse, urljoin
-from utils import rm_slash
+from .utils import rm_slash
+from requests_html import HTML
 
 
 re_zh_text = zh_re = re.compile('[\u4e00-\u9fa5]')
@@ -11,7 +12,7 @@ re_archive_en = re.compile('archive')
 re_tag_zh = re.compile('标签')
 re_tag_en = re.compile('tag')
 re_cate_zh = re.compile('分类')
-re_cate_en = re.compile('categor')
+re_cate_en = re.compile('category')
 re_about_zh = re.compile('关于')
 re_about_en = re.compile('about')
 re_theme_en = re.compile('theme')
@@ -30,9 +31,9 @@ re_map = {
 
 
 class SiteFeatureTransformer:
-    def __init__(self, url, r, friends, is_zh_i9t_blog=True):
-        self.text = r.html.text
-        self.r = r
+    def __init__(self, url, html_text, friends, is_zh_i9t_blog=True):
+        self.text = html_text
+        self.html = HTML(html=html_text)
         self.url = rm_slash(url)
         self.friends = friends
         self.is_zh_i9t_blog = is_zh_i9t_blog
@@ -54,7 +55,7 @@ class SiteFeatureTransformer:
 
     @property
     def name(self):
-        title = self.r.html.find('title', first=True)
+        title = self.html.find('title', first=True)
         if title:
             return title.text
         else:
@@ -62,7 +63,7 @@ class SiteFeatureTransformer:
 
     @property
     def description(self):
-        find_in_meta = self.r.html.find("meta[name='description']", first=True)
+        find_in_meta = self.html.find("meta[name='description']", first=True)
         if find_in_meta:
             return find_in_meta.attrs.get('content', '')
         return ''
@@ -84,14 +85,14 @@ class SiteFeatureTransformer:
             'text/atom',
             'text/rdf',
         ]
-        type_links = self.r.html.find('link[type]')
+        type_links = self.html.find('link[type]')
         if type_links:
             for link in type_links:
                 link_type = link.attrs.get("type", None)
                 if link_type and link_type in set(RSS_TYPES):
                     return self.url_trans(link.attrs.get("href"))
 
-        a_links = self.r.html.find('a')
+        a_links = self.html.find('a')
         re_check = '([^a-zA-Z]|^)rss([^a-zA-Z]|$)'
         re_rss = r'\/(feed|rss|atom)(\.(xml|rss|atom))?$'
         for a in a_links:
@@ -110,8 +111,8 @@ class SiteFeatureTransformer:
     @property
     def icon(self):
         _default = urljoin(self.url, 'favicon.ico')
-        icon = self.r.html.find("link[rel='icon']", first=True)
-        shortcut_icon = self.r.html.find(
+        icon = self.html.find("link[rel='icon']", first=True)
+        shortcut_icon = self.html.find(
             "link[rel='shortcut icon']", first=True)
 
         if icon:
@@ -125,11 +126,11 @@ class SiteFeatureTransformer:
 
     @property
     def generator(self):
-        find_in_meta = self.r.html.find("meta[name='generator']", first=True)
+        find_in_meta = self.html.find("meta[name='generator']", first=True)
         if find_in_meta:
             return find_in_meta.attrs.get('content', 'unknown')
 
-        find_in_html_text = self.r.html.search("Powered by{}<a{}>{}</a>")
+        find_in_html_text = self.html.search("Powered by{}<a{}>{}</a>")
         if find_in_html_text:
             return find_in_html_text[2]
         else:
@@ -141,7 +142,8 @@ class SiteFeatureTransformer:
                                for re_item in res]) for k, res in re_map.items()}
         feature_has["has_generator"] = bool(self.generator != 'unknown')
         feature_has["has_rss"] = bool(self.rss)
-        feature_has["has_blog_text"] = feature_has["has_blog_text"] or self.url.find('blog') > 0
+        feature_has["has_blog_text"] = feature_has["has_blog_text"] or self.url.find(
+            'blog') > 0
 
         feature = {
             "len_friends":  len(self.friends),
@@ -161,15 +163,6 @@ class SiteFeatureTransformer:
             "icon": self.icon,
             "friends": self.friends,
             "url": self.url,
-            "tld": self.tld,
-            "sld": self.sld,
             "is_zh_i9t_blog": self.is_zh_i9t_blog
         }
         return {**feature, **data}
-
-    def save_data_to_file(self):
-        p = os.path.join('is_site_a_zh_i9t_blog',
-                         'data', f'{self.domain}.json')
-        if not os.path.exists(p):
-            with open(p, 'w') as f:
-                json.dump(self.to_data(), f)

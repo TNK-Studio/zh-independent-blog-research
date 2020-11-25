@@ -1,5 +1,4 @@
-{
-    "q": [
+seed = [
         "https://blog.t9t.io",
         "http://www.ruanyifeng.com/blog",
         "https://coolshell.cn",
@@ -216,4 +215,3 @@
         "https://hutusi.com/",
         "http://tuwee.cn/"
     ]
-}
