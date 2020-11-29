@@ -1,25 +1,39 @@
 import scrapy
 from requests_html import HTML, HTMLSession
-from .utils import PASS_DOMAIN, geuss_link_url, rm_slash, has_url_html_been_fetched, url_trans, test_blog, bcolors
+from .utils import PASS_DOMAIN, geuss_link_url, rm_slash, has_url_html_been_fetched, url_trans, bcolors
 from .site_feature import SiteFeatureTransformer
 from urllib.parse import urlparse
 from .seed import seed
-from is_site_a_zh_i9t_blog import is_zh_i9t_blog
+from .is_zh_i9t_blog import is_zh_i9t_blog
 
 session = HTMLSession()
+
+seed_set = set([urlparse(url).netloc for url in seed])
 
 
 class BlogSpider(scrapy.Spider):
     name = "blogs"
     start_urls = seed
 
+    def filter(self, site):
+        # white list
+        if site.domain in seed_set:
+            return True
+        if len(site.friends) > 75:
+            return False
+        if is_zh_i9t_blog(site.feature):
+            return True
+        return False
+
     def parse(self, response):
         html = HTML(url=response.url, html=response.text)
         friends = self.get_friends(html)
         site_feature = SiteFeatureTransformer(
             url=html.url, html_text=response.text, friends=friends)
-        yield site_feature.to_data()
-        yield from response.follow_all(friends, callback=self.parse)
+
+        if self.filter(site_feature):
+            yield site_feature.to_data()
+            yield from response.follow_all(friends, callback=self.parse)
 
     def get_friends(self, html):
         friends_link = self.get_friends_page_link(html)

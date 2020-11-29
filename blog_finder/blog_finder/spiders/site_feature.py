@@ -147,8 +147,6 @@ class SiteFeatureTransformer:
 
         feature = {
             "len_friends":  len(self.friends),
-            # "tld": self.tld,
-            # "sld": self.sld,
         }
         return {**feature_has, **feature}
 

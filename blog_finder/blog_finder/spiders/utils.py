@@ -4,15 +4,20 @@ import json
 from urllib.parse import urljoin, urlparse
 
 
+# 恶心
+BLACK_LIST = [
+    "1588.tv"
+]
+
 # 整个 alexa top 100 排名？
-PASS_DOMAIN = ["youtube.com", "wikipedia.org", "facebook.com", "twitter.com", "zhihu.com",
-               "weibo.com", "github.com", "reactjs.org", "material-ui.com", "gatsbyjs.org",
-               "steamcommunity.com", "segmentfault.com", "netlify.com", "wordpress.com", "taobao.com",
-               "gohugo.io", "hexo.io", "gov.cn", "cloudflare.com", "ubuntu.com",
-               "docker.com", "jekyll.com", "localhost", "blogspot.com", "tmall.com",
-               "wordpress.cn", "wordpress.org", "baidu.com", "blogger.com", "qq.com",
-               "edu.cn", "edu", "gov"
-               ]
+PASS_DOMAIN = BLACK_LIST + ["youtube.com", "wikipedia.org", "facebook.com", "twitter.com", "zhihu.com",
+                            "weibo.com", "github.com", "reactjs.org", "material-ui.com", "gatsbyjs.org",
+                            "steamcommunity.com", "segmentfault.com", "netlify.com", "wordpress.com", "taobao.com",
+                            "gohugo.io", "hexo.io", "gov.cn", "cloudflare.com", "ubuntu.com",
+                            "docker.com", "jekyll.com", "localhost", "blogspot.com", "tmall.com",
+                            "wordpress.cn", "wordpress.org", "baidu.com", "blogger.com", "qq.com",
+                            "edu.cn", "edu", "gov"
+                            ]
 
 
 class bcolors:
@@ -24,22 +29,6 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
-
-
-def test_blog(feature: dict):
-    # ml 目前数据量较少，暂时采用评分判定。
-    feature_weights_map = {
-        'has_archive': 15,
-        'has_tag': 15,
-        'has_category': 10,
-        'has_about': 5,
-        'has_theme': 5,
-        # 'has_zh_text': 10,
-        'has_blog_text': 20,
-        'has_generator': 20,
-        'has_rss': 30,
-    }
-    return sum([feature_weights_map[k] for k, v in feature.items() if v and k in feature_weights_map.keys()]) >= 40
 
 
 def url_trans(base_url, url: str):
